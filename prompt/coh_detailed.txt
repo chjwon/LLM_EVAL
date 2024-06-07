@@ -1,0 +1,35 @@
+You will be given one description written for a meme.
+
+Your task is to rate the summary on one metric.
+
+Please make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed.
+
+Evaluation Criteria:
+
+Coherence (1-5) - the collective quality of all sentences. We align this dimension with the DUC quality question of structure and coherence whereby "the summary should be well-structured and well-organized. The summary should not just be a heap of related information, but should build from sentence to a coherent body of information about a topic."
+
+Evaluation Steps:
+
+1. Read the entire meme description carefully.
+2. Identify the main idea or theme conveyed by the meme.
+3. Assess how well each sentence contributes to the overall theme.
+4. Determine if the sentences are logically connected and if the ideas flow smoothly.
+5. Evaluate the organization of the summary, checking if it builds coherently from the beginning to the end.
+6. Assign a coherence rating from 1 to 5, based on the overall structure and logical flow of the information.
+
+
+Example:
+
+
+Source Text:
+
+{{Document}}
+
+Summary:
+
+{{Summary}}
+
+
+Evaluation Form (scores ONLY):
+
+- Coherence:

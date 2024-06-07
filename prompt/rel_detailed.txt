@@ -1,0 +1,35 @@
+You will be given one summary written for a meme.
+
+Your task is to rate the summary on one metric.
+
+Please make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed.
+
+Evaluation Criteria:
+
+Relevance (1-5) - selection of important content from the source. The summary should include only important information from the source document. Annotators were instructed to penalize summaries which contained redundancies and excess information.
+
+Evaluation Steps:
+
+1. Read the entire summary carefully.
+2. Identify the key points and important information from the source document.
+3. Compare the summary to the source to see if it includes these key points.
+4. Check for any redundant or excess information that does not add value.
+5. Evaluate if the summary focuses on the most important content without unnecessary details.
+6. Assign a relevance rating from 1 to 5, based on the inclusion of important information and absence of redundancies.
+
+
+Example:
+
+
+Source Text:
+
+{{Document}}
+
+Summary:
+
+{{Summary}}
+
+
+Evaluation Form (scores ONLY):
+
+- Relevance:

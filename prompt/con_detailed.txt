@@ -1,0 +1,35 @@
+You will be given a description written for a meme. 
+
+Your task is to rate the summary on one metric.
+
+Please make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed.
+
+
+Evaluation Criteria:
+
+Consistency (1-5) - the factual alignment between the summary and the summarized source. A factually consistent summary contains only statements that are entailed by the source document. Annotators were also asked to penalize summaries that contained hallucinated facts. 
+
+Evaluation Steps:
+
+1. Read the entire meme description carefully.
+2. Compare each fact in the description to the original source material.
+3. Identify any discrepancies or hallucinated facts that are not present in the source.
+4. Evaluate if the description accurately reflects the information and tone of the source.
+5. Assign a consistency rating from 1 to 5, based on the alignment between the description and the source material.
+
+
+Example:
+
+
+Source Text: 
+
+{{Document}}
+
+Summary: 
+
+{{Summary}}
+
+
+Evaluation Form (scores ONLY):
+
+- Consistency:
