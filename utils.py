@@ -188,56 +188,57 @@ from openai import OpenAI
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # print(device)
-openaiKey = open("openaiKey.txt",'r').readline()
+
+# openaiKey = open("openaiKey.txt",'r').readline()
 # print(openaiKey)
 
-def send_gpt_geval(cur_prompt):
-    client = OpenAI(api_key=openaiKey)
-    score = 0
-    try:
-        _response = client.chat.completions.create(model="gpt-4-0613",
-        messages=[{"role": "system", "content": cur_prompt}],
-        temperature=2,
-        max_tokens=5,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0,
-        stop=None,
-        n=20)
-        time.sleep(0.5)
+# def send_gpt_geval(cur_prompt):
+#     client = OpenAI(api_key=openaiKey)
+#     score = 0
+#     try:
+#         _response = client.chat.completions.create(model="gpt-4-0613",
+#         messages=[{"role": "system", "content": cur_prompt}],
+#         temperature=2,
+#         max_tokens=5,
+#         top_p=1,
+#         frequency_penalty=0,
+#         presence_penalty=0,
+#         stop=None,
+#         n=20)
+#         time.sleep(0.5)
 
-        all_responses = [_response.choices[i].message.content for i in
-                            range(len(_response.choices))]
-        scores = [float(response) for response in all_responses if response.replace('.', '', 1).isdigit()]
-        if scores:
-            score = sum(scores) / len(scores)
-        else:
-            print(f"No valid scores returned")
-    except Exception as e:
-        print(e)
-        if ("limit" in str(e)):
-            time.sleep(2)
-        else:
-            print('ignored')
-    return score
+#         all_responses = [_response.choices[i].message.content for i in
+#                             range(len(_response.choices))]
+#         scores = [float(response) for response in all_responses if response.replace('.', '', 1).isdigit()]
+#         if scores:
+#             score = sum(scores) / len(scores)
+#         else:
+#             print(f"No valid scores returned")
+#     except Exception as e:
+#         print(e)
+#         if ("limit" in str(e)):
+#             time.sleep(2)
+#         else:
+#             print('ignored')
+#     return score
 
-def geval_score(sentence_generated, sentence_gold):
-    coh_prompt = open("./prompt/coh_detailed.txt").read() # /5
-    con_prompt = open("./prompt/con_detailed.txt").read() # /5
-    flu_prompt = open("./prompt/flu_detailed.txt").read() # /3
-    rel_prompt = open("./prompt/rel_detailed.txt").read() # /5
+# def geval_score(sentence_generated, sentence_gold):
+#     coh_prompt = open("./prompt/coh_detailed.txt").read() # /5
+#     con_prompt = open("./prompt/con_detailed.txt").read() # /5
+#     flu_prompt = open("./prompt/flu_detailed.txt").read() # /3
+#     rel_prompt = open("./prompt/rel_detailed.txt").read() # /5
     
-    coh_prompt = coh_prompt.replace('{{Document}}', sentence_generated).replace('{{Summary}}', sentence_gold)
-    con_prompt = con_prompt.replace('{{Document}}', sentence_generated).replace('{{Summary}}', sentence_gold)
-    flu_prompt = flu_prompt.replace('{{Document}}', sentence_generated).replace('{{Summary}}', sentence_gold)
-    rel_prompt = rel_prompt.replace('{{Document}}', sentence_generated).replace('{{Summary}}', sentence_gold)
+#     coh_prompt = coh_prompt.replace('{{Document}}', sentence_generated).replace('{{Summary}}', sentence_gold)
+#     con_prompt = con_prompt.replace('{{Document}}', sentence_generated).replace('{{Summary}}', sentence_gold)
+#     flu_prompt = flu_prompt.replace('{{Document}}', sentence_generated).replace('{{Summary}}', sentence_gold)
+#     rel_prompt = rel_prompt.replace('{{Document}}', sentence_generated).replace('{{Summary}}', sentence_gold)
     
-    coh_score = send_gpt_geval(cur_prompt=coh_prompt)
-    con_score = send_gpt_geval(cur_prompt=con_prompt)
-    flu_score = send_gpt_geval(cur_prompt=flu_prompt)
-    rel_score = send_gpt_geval(cur_prompt=rel_prompt)
-    print("coh_score, con_score, flu_score, rel_score:", coh_score, con_score, flu_score, rel_score)
-    return coh_score, con_score, flu_score, rel_score
+#     coh_score = send_gpt_geval(cur_prompt=coh_prompt)
+#     con_score = send_gpt_geval(cur_prompt=con_prompt)
+#     flu_score = send_gpt_geval(cur_prompt=flu_prompt)
+#     rel_score = send_gpt_geval(cur_prompt=rel_prompt)
+#     print("coh_score, con_score, flu_score, rel_score:", coh_score, con_score, flu_score, rel_score)
+#     return coh_score, con_score, flu_score, rel_score
 
 
 def bert_score(sentence_generated,sentence_gold):

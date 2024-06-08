@@ -1,4 +1,4 @@
-from utils import bleu_score, rougue_score, bert_score, selfcheck_nli_score, semscore_score, geval_score
+from utils import bleu_score, rougue_score, bert_score, selfcheck_nli_score, semscore_score
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -31,6 +31,3 @@ print("selfcheck_nli_score:",selfcheck_nli_score_value)
 
 semscore_score_value = semscore_score(mock_generated_2, mock_gold)
 print("semscore:", semscore_score_value)
-
-geval_score_value = geval_score(mock_generated_2, mock_gold)
-print("geval score:", geval_score_value)
