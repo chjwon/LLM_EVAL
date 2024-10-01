@@ -7,11 +7,21 @@ output : score | type float
 
 """
 from transformers import AutoTokenizer, AutoModel
+from transformers import DebertaV2ForSequenceClassification, DebertaV2Tokenizer
 from accelerate import Accelerator
 from accelerate.utils import gather_object
 from tqdm import tqdm
 import torch, gc
 import torch.nn as nn
+import numpy as np
+from typing import List
+from bert_score import score
+import evaluate
+from evaluate import load
+import time
+from selfcheckgpt.modeling_selfcheck import SelfCheckNLI
+from nltk.translate.bleu_score import sentence_bleu
+from openai import OpenAI
 
 class EmbeddingModelWrapper():
     DEFAULT_MODEL="sentence-transformers/all-mpnet-base-v2"
@@ -176,15 +186,55 @@ class ModelPredictionGenerator:
         else:
             return eval_prompts_local
 
+class NLIConfig_custom:
+    nli_model: str = "potsawee/deberta-v3-large-mnli"
 
-import torch
-from bert_score import score
-import evaluate
-from evaluate import load
-import time
-from selfcheckgpt.modeling_selfcheck import SelfCheckNLI
-from nltk.translate.bleu_score import sentence_bleu
-from openai import OpenAI
+class Deberta_Emb:
+
+    def __init__(
+        self,
+        nli_model: str = None,
+        device = None
+    ):
+        nli_model = nli_model if nli_model is not None else NLIConfig_custom.nli_model
+        self.tokenizer = DebertaV2Tokenizer.from_pretrained(nli_model)
+        self.model = DebertaV2ForSequenceClassification.from_pretrained(nli_model)
+        self.model.eval()
+        if device is None:
+            device = torch.device("cpu")
+        self.model.to(device)
+        self.device = device
+        print("SelfCheck-NLI initialized to device", device)
+    
+    @torch.no_grad()
+    def get_embeddings(
+        self,
+        sentence_1: str,
+        sentence_2: str,
+    ):
+        """
+        This function takes two sentences and returns the embeddings of both sentences.
+        :param sentence_1: str -- the first sentence (e.g. the gold standard)
+        :param sentence_2: str -- the second sentence (e.g. the generated sentence)
+        :return embeddings: list of two embeddings (one for each sentence)
+        """
+        inputs_1 = self.tokenizer(sentence_1, return_tensors="pt", padding="longest", truncation=True)
+        inputs_2 = self.tokenizer(sentence_2, return_tensors="pt", padding="longest", truncation=True)
+
+        inputs_1 = inputs_1.to(self.device)
+        inputs_2 = inputs_2.to(self.device)
+
+        # Get the hidden states (embeddings) from the model by explicitly setting output_hidden_states=True
+        outputs_1 = self.model(**inputs_1, output_hidden_states=True)
+        outputs_2 = self.model(**inputs_2, output_hidden_states=True)
+
+        # Extract the last hidden state (embedding)
+        embeddings_1 = outputs_1.hidden_states[-1].mean(dim=1)  # Mean pool over token dimension
+        embeddings_2 = outputs_2.hidden_states[-1].mean(dim=1)  # Mean pool over token dimension
+
+        return [embeddings_1.cpu().numpy(), embeddings_2.cpu().numpy()]
+
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # print(device)
@@ -282,3 +332,30 @@ def semscore_score(sentence_generated, sentence_gold):
     sentence_embeddings = em.get_embeddings(sentences)
     similarities = em.get_similarities(sentence_embeddings.cuda())
     return similarities[1][0]
+
+
+def deberta_emb(sentence_generated,sentence_gold):
+    device = "cuda:0"
+    deberta_emb = Deberta_Emb(device=device)
+
+    embeddings = deberta_emb.get_embeddings(
+        sentence_1=sentence_gold,                          
+        sentence_2=sentence_generated,
+    )
+    return embeddings
+
+def cosine_similarity(matrix1, matrix2):
+    # Flatten the matrices to 1D vectors
+    vec1 = matrix1.flatten()
+    vec2 = matrix2.flatten()
+    
+    # Compute cosine similarity
+    dot_product = np.dot(vec1, vec2)
+    norm1 = np.linalg.norm(vec1)
+    norm2 = np.linalg.norm(vec2)
+    
+    return dot_product / (norm1 * norm2)
+
+def deberta_cos_score(sentence_generated,sentence_gold):
+    emb_result = deberta_emb(sentence_generated, sentence_gold)
+    return cosine_similarity(emb_result[0],emb_result[1])
