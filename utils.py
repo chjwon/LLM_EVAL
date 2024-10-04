@@ -180,11 +180,11 @@ class ModelPredictionGenerator:
 import torch
 from bert_score import score
 import evaluate
-from evaluate import load
-import time
+# from evaluate import load
+# import time
 from selfcheckgpt.modeling_selfcheck import SelfCheckNLI
 from nltk.translate.bleu_score import sentence_bleu
-from openai import OpenAI
+# from openai import OpenAI
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # print(device)
@@ -248,12 +248,11 @@ def bert_score(sentence_generated,sentence_gold):
     return P.mean().item()
 
 
+selfcheck_nli = SelfCheckNLI(device=device)
 def selfcheck_nli_score(sentence_generated,sentence_gold):
-    selfcheck_nli = SelfCheckNLI(device=device)
-
     sent_scores_nli = selfcheck_nli.predict(
-    sentences = [sentence_gold],                          
-    sampled_passages = [sentence_generated],
+        sentences = [sentence_gold],                          
+        sampled_passages = [sentence_generated],
     )
     return normalize_selfcheck_score(sent_scores_nli[0])
 
