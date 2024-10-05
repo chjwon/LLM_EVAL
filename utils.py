@@ -297,9 +297,8 @@ def bert_score(sentence_generated,sentence_gold):
     (P, R, F), hashname = score(cands, refs, lang="en", return_hash=True)
     return P.mean().item()
 
-
+selfcheck_nli = SelfCheckNLI(device=device)
 def selfcheck_nli_score(sentence_generated,sentence_gold):
-    selfcheck_nli = SelfCheckNLI(device=device)
 
     sent_scores_nli = selfcheck_nli.predict(
     sentences = [sentence_gold],                          
@@ -332,7 +331,6 @@ def semscore_score(sentence_generated, sentence_gold):
     sentence_embeddings = em.get_embeddings(sentences)
     similarities = em.get_similarities(sentence_embeddings.cuda())
     return similarities[1][0]
-
 
 def deberta_emb(sentence_generated,sentence_gold):
     device = "cuda:0"
