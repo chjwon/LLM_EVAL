@@ -297,8 +297,12 @@ def bert_score(sentence_generated,sentence_gold):
     return P.mean().item()
 
 
-selfcheck_nli = SelfCheckNLI(device=device)
+selfcheck_nli = SelfCheckNLI(device='cuda' if torch.cuda.is_available() else 'cpu')
 def selfcheck_nli_score(sentence_generated,sentence_gold):
+    """
+    Returns the selfcheck score for the given sentence pair.
+    The model is initialized in the global scope, with device='cuda'
+    """
     sent_scores_nli = selfcheck_nli.predict(
         sentences = [sentence_gold],                          
         sampled_passages = [sentence_generated],
