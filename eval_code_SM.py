@@ -1,7 +1,9 @@
 import pandas as pd
-from LLM_EVAL.utils import bleu_score, rougue_score, bert_score, selfcheck_nli_score
+from utils import bleu_score, rougue_score, bert_score, selfcheck_nli_score
 import ast
-fileName = "/home/jaewon/HMD_files/src/task1/results/Oct/task1_genBK_llava_zero_result.csv"
+
+seed = 0
+fileName = f"/home/jaewon/HMD_files/src/task1/results/Oct/v1.6_no_seed/task1_genSM_llava_zero_result_{seed}.csv"
 file = pd.read_csv(fileName)
 
 
@@ -18,10 +20,19 @@ def safe_convert_to_string(value):
 
 for idx, row in file.iterrows():
     print("Current idx",idx)
-    generated_text = safe_convert_to_string(row['task1_genBK_llava_zero'])
+    
+    
+    surface_message = row['surface_message']
+    image_caption = row['image_caption']
+    text = row['text']
+    if surface_message in ['1', 1]:
+        reference_text = f"{image_caption.strip('.')}. The author describes this image as: '{text}'"
+    elif surface_message in ['2', 2]:
+        reference_text = f"{image_caption.strip('.')}. The person in the image says that: '{text}'"
+
+    generated_text = safe_convert_to_string(row['task1_genSM_llava_zero_parsed'])
     generated_text = ast.literal_eval(generated_text)[0]
-    reference_text = safe_convert_to_string(row['background_knowledge'])
-    reference_text = ast.literal_eval(reference_text)[0]
+
     
     if generated_text and reference_text:
         bleu = bleu_score(generated_text, reference_text)

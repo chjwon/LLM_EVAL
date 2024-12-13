@@ -22,7 +22,7 @@ import time
 from selfcheckgpt.modeling_selfcheck import SelfCheckNLI
 from nltk.translate.bleu_score import sentence_bleu
 from openai import OpenAI
-
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class EmbeddingModelWrapper():
     DEFAULT_MODEL="sentence-transformers/all-mpnet-base-v2"
 
@@ -48,7 +48,7 @@ class EmbeddingModelWrapper():
         return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
     def get_embeddings(self, sentences):
-        embeddings=torch.tensor([],device="cuda")
+        embeddings=torch.tensor([],device=device)
         
         if self.bs is None:
             batches=[sentences]
@@ -56,7 +56,7 @@ class EmbeddingModelWrapper():
             batches = [sentences[i:i + self.bs] for i in range(0, len(sentences), self.bs)]  
             
         for sentences in batches:
-            encoded_input = self.tokenizer(sentences, padding=True, truncation=True, return_tensors='pt').to("cuda")
+            encoded_input = self.tokenizer(sentences, padding=True, truncation=True, return_tensors='pt').to(device)
             with torch.no_grad():
                 model_output = self.model(**encoded_input)        
             batch_embeddings=self.emb_mean_pooling(model_output, encoded_input['attention_mask'])
@@ -235,7 +235,6 @@ class Deberta_Emb:
         return [embeddings_1.cpu().numpy(), embeddings_2.cpu().numpy()]
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # print(device)
 
 # openaiKey = open("openaiKey.txt",'r').readline()
@@ -294,7 +293,7 @@ def bert_score(sentence_generated,sentence_gold):
     cands = [sentence_generated]
     refs = [sentence_gold]
     (P, R, F), hashname = score(cands, refs, lang="en", return_hash=True)
-    return P.mean().item()
+    return F.mean().item()
 
 
 selfcheck_nli = SelfCheckNLI(device=device)
@@ -310,7 +309,11 @@ def normalize_selfcheck_score(score):
 
 def bleu_score(sentence_generated,sentence_gold):
     references = [sentence_gold.split()]
-    candidate = sentence_generated.split()
+    if sentence_generated is None:
+        return 0
+    else:
+        candidate = sentence_generated.split()
+
     score = sentence_bleu(references, candidate)
     return score
 
@@ -332,7 +335,6 @@ def semscore_score(sentence_generated, sentence_gold):
     return similarities[1][0]
 
 def deberta_emb(sentence_generated,sentence_gold):
-    device = "cuda:0"
     deberta_emb = Deberta_Emb(device=device)
 
     embeddings = deberta_emb.get_embeddings(
